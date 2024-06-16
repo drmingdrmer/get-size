@@ -85,7 +85,7 @@ fn add_trait_bounds(
                 continue;
             }
 
-            type_param.bounds.push(syn::parse_quote!(GetSize));
+            type_param.bounds.push(syn::parse_quote!(::get_size::GetSize));
         }
     }
     generics
@@ -117,7 +117,7 @@ pub fn derive_get_size(input: TokenStream) -> TokenStream {
             if data_enum.variants.is_empty() {
                 // Empty enums are easy to implement.
                 let gen = quote! {
-                    impl GetSize for #name {}
+                    impl ::get_size::GetSize for #name {}
                 };
                 return gen.into()
             }
@@ -146,7 +146,7 @@ pub fn derive_get_size(input: TokenStream) -> TokenStream {
                             let field_ident = syn::parse_str::<syn::Ident>(&field_ident).unwrap();
 
                             field_cmds.push(quote! {
-                                let (total_add, tracker) = GetSize::get_heap_size_with_tracker(#field_ident, tracker);
+                                let (total_add, tracker) = ::get_size::GetSize::get_heap_size_with_tracker(#field_ident, tracker);
                                 total += total_add;
                             })
                         }
@@ -174,7 +174,7 @@ pub fn derive_get_size(input: TokenStream) -> TokenStream {
                             field_idents.push(field_ident);
 
                             field_cmds.push(quote! {
-                                let (total_add, tracker) = GetSize::get_heap_size_with_tracker(#field_ident, tracker);
+                                let (total_add, tracker) = ::get_size::GetSize::get_heap_size_with_tracker(#field_ident, tracker);
                                 total += total_add;
                             })
                         }
@@ -199,16 +199,16 @@ pub fn derive_get_size(input: TokenStream) -> TokenStream {
 
             // Build the trait implementation
             let gen = quote! {
-                impl #impl_generics GetSize for #name #ty_generics #where_clause {
+                impl #impl_generics ::get_size::GetSize for #name #ty_generics #where_clause {
                     fn get_heap_size(&self) -> usize {
                         let tracker = get_size::StandardTracker::default();
 
-                        let (total, _) = GetSize::get_heap_size_with_tracker(self, tracker);
+                        let (total, _) = ::get_size::GetSize::get_heap_size_with_tracker(self, tracker);
 
                         total
                     }
 
-                    fn get_heap_size_with_tracker<TRACKER: get_size::GetSizeTracker>(
+                    fn get_heap_size_with_tracker<TRACKER: ::get_size::GetSizeTracker>(
                         &self,
                         tracker: TRACKER,
                     ) -> (usize, TRACKER) {
@@ -225,7 +225,7 @@ pub fn derive_get_size(input: TokenStream) -> TokenStream {
             if data_struct.fields.is_empty() {
                 // Empty structs are easy to implement.
                 let gen = quote! {
-                    impl GetSize for #name {}
+                    impl ::get_size::GetSize for #name {}
                 };
                 return gen.into();
             }
@@ -260,13 +260,13 @@ pub fn derive_get_size(input: TokenStream) -> TokenStream {
 
                 if let Some(ident) = field.ident.as_ref() {
                     cmds.push(quote! {
-                        let (total_add, tracker) = GetSize::get_heap_size_with_tracker(&self.#ident, tracker);
+                        let (total_add, tracker) = ::get_size::GetSize::get_heap_size_with_tracker(&self.#ident, tracker);
                         total += total_add;
                     });
                 } else {
                     let current_index = syn::Index::from(unidentified_fields_count);
                     cmds.push(quote! {
-                        let (total_add, tracker) = GetSize::get_heap_size_with_tracker(&self.#current_index, tracker);
+                        let (total_add, tracker) = ::get_size::GetSize::get_heap_size_with_tracker(&self.#current_index, tracker);
                         total += total_add;
                     });
 
@@ -276,16 +276,16 @@ pub fn derive_get_size(input: TokenStream) -> TokenStream {
 
             // Build the trait implementation
             let gen = quote! {
-                impl #impl_generics GetSize for #name #ty_generics #where_clause {
+                impl #impl_generics ::get_size::GetSize for #name #ty_generics #where_clause {
                     fn get_heap_size(&self) -> usize {
                         let tracker = get_size::StandardTracker::default();
 
-                        let (total, _) = GetSize::get_heap_size_with_tracker(self, tracker);
+                        let (total, _) = ::get_size::GetSize::get_heap_size_with_tracker(self, tracker);
 
                         total
                     }
 
-                    fn get_heap_size_with_tracker<TRACKER: get_size::GetSizeTracker>(
+                    fn get_heap_size_with_tracker<TRACKER: ::get_size::GetSizeTracker>(
                         &self,
                         tracker: TRACKER,
                     ) -> (usize, TRACKER) {
